@@ -88,7 +88,6 @@ extension UIKitTextViewRepresentable {
             
             recalculateHeight()
         }
-        
 
         private func recalculateHeight() {
             let newSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .greatestFiniteMagnitude))
@@ -98,81 +97,6 @@ extension UIKitTextViewRepresentable {
                 self.calculatedHeight.wrappedValue = newSize.height
             }
         }
- 
-        /*
-        private func recalculateHeight1() {
-            let textStorage = NSTextStorage(attributedString: textView.attributedText)
-            let layoutManager = NSLayoutManager()
-            textStorage.addLayoutManager(layoutManager)
-            let textContainer = NSTextContainer(size: CGSize(width: textView.frame.size.width - 2 * UIKitTextViewRepresentable.horizontalPadding, height: CGFloat.greatestFiniteMagnitude))
-//            textContainer.lineFragmentPadding = 0
-//            textContainer.maximumNumberOfLines = 0
-            layoutManager.addTextContainer(textContainer)
-            let newSize = layoutManager.usedRect(for: textContainer).size
-            guard calculatedHeight.wrappedValue != newSize.height else { return }
-            
-            DispatchQueue.main.async { // call in next render cycle.
-                print("newSize.height: \(newSize.height)")
-                self.calculatedHeight.wrappedValue = newSize.height
-            }
-        }
-        
-        
-        private func recalculateHeight2() {
-            let size = CGSize(width: textView.frame.width - 2 * UIKitTextViewRepresentable.horizontalPadding, height: .greatestFiniteMagnitude)
-            let options = NSStringDrawingOptions.usesFontLeading.union(.usesLineFragmentOrigin)
-            let context = NSStringDrawingContext()
-//            context.minimumScaleFactor = textView.minimumScaleFactor
-            let boundingRect = text.wrappedValue.boundingRect(with: size, options: options, context: context)
-            let newSize = CGSize(width: ceil(boundingRect.width), height: ceil(boundingRect.height))
-
-            guard calculatedHeight.wrappedValue != newSize.height else { return }
-
-            DispatchQueue.main.async {
-                self.calculatedHeight.wrappedValue = newSize.height
-            }
-        }
-        
-       
-         - (CGSize)rectForAttributedString:(NSAttributedString *)string withSize:(CGSize)theSize
-         {
-             if (!string || CGSizeEqualToSize(theSize, CGSizeZero)) {
-                 return CGSizeZero;
-             }
-
-             // setup TextKit stack
-             NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:theSize];
-             NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:string];
-             NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
-             [layoutManager addTextContainer:textContainer];
-             [textStorage addLayoutManager:layoutManager];
-
-             // query for size
-             CGRect rect = [layoutManager usedRectForTextContainer:textContainer];
-
-             return CGSizeMake(ceilf(rect.size.width), ceilf(rect.size.height));
-         }
-         
-        
-        private func recalculateHeight() {
-            let size = CGSize(width: textView.frame.width, height: .greatestFiniteMagnitude)
-            
-            let textContainer = NSTextContainer(size: size)
-            let textStorage = NSTextStorage(attributedString: textView.attributedText)
-            let layoutManager = NSLayoutManager()
-            layoutManager.addTextContainer(textContainer)
-            textStorage.addLayoutManager(layoutManager)
-            
-            let boundingRect = layoutManager.usedRect(for: textContainer)
-//            let newSize = CGSize(width: ceil(boundingRect.width), height: ceil(boundingRect.height))
-            
-            guard calculatedHeight.wrappedValue != boundingRect.height else { return }
-
-            DispatchQueue.main.async {
-                self.calculatedHeight.wrappedValue = boundingRect.height
-            }
-        }
-         */
     }
 }
 
