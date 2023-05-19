@@ -9,100 +9,68 @@
 import SwiftUI
 import UIKit
 
+class MessageInputViewModel: ObservableObject {
+    @Published var calculatedHeight: CGFloat = 42
+    @Published var maxHeightConstant: CGFloat = 250
+    @Published var isScrollingEnabled = false
+}
+
+
 @available(macOS, unavailable)
-public struct UIKitTextViewRepresentable: UIViewRepresentable {
-    @Binding private var text: NSAttributedString
-    @Binding private var calculatedHeight: CGFloat
-    @Binding private var clearText: Bool
+struct UIKitTextViewRepresentable: UIViewRepresentable {
+    @Binding var text: String
+    var viewModel: MessageInputViewModel
     
-    private let isScrollingEnabled: Bool
+    private let padding: CGFloat = 10
     
-    static let horizontalPadding: CGFloat = 10
-    
-    public init(text: Binding<String>, calculatedHeight: Binding<CGFloat>, clearText: Binding<Bool>, isScrollingEnabled: Bool) {
-        _text = Binding(
-            get: { NSAttributedString(string: text.wrappedValue) },
-            set: { newValue in
-                DispatchQueue.main.async {
-                    text.wrappedValue = newValue.string
-                }
-            }
-        )
-        _calculatedHeight = calculatedHeight
-        _clearText = clearText
-        self.isScrollingEnabled = isScrollingEnabled
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
     }
     
-    public func makeCoordinator() -> Coordinator {
-        Coordinator(text: $text, calculatedHeight: $calculatedHeight)
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.backgroundColor = .clear
+        textView.textContainerInset = UIEdgeInsets(top: padding, left: padding, bottom: padding, right: padding)
+        textView.attributedText = NSAttributedString(string: text)
+        textView.font = .preferredFont(forTextStyle: .body)
+        textView.textColor = .label
+        textView.adjustsFontForContentSizeCategory = true
+        textView.textContainer.lineBreakMode = .byWordWrapping
+        textView.delegate = context.coordinator
+        textView.isScrollEnabled = true
+        textView.textContainer.heightTracksTextView = true
+        return textView
     }
     
-    public func makeUIView(context: Context) -> UITextView {
-        context.coordinator.textView
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        uiView.text = text
     }
     
-    public func updateUIView(_ uiView: UITextView, context: Context) {
-        context.coordinator.update(representable: self)
-    }
-}
-
-extension UIKitTextViewRepresentable {
-    public class Coordinator: NSObject {
-        let textView: UITextView
+    class Coordinator: NSObject, UITextViewDelegate {
+        var parent: UIKitTextViewRepresentable
         
-        private var text: Binding<NSAttributedString>
-        private var calculatedHeight: Binding<CGFloat>
         
-        init(text: Binding<NSAttributedString>, calculatedHeight: Binding<CGFloat>) {
-            textView = UITextView()
-            textView.backgroundColor = .clear
-            textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-            textView.contentInset.left = UIKitTextViewRepresentable.horizontalPadding
-            textView.contentInset.right = UIKitTextViewRepresentable.horizontalPadding
-            textView.attributedText = text.wrappedValue
-            textView.font = .preferredFont(forTextStyle: .body)
-            textView.textColor = .label
-            textView.adjustsFontForContentSizeCategory = true
-            textView.textContainer.lineBreakMode = .byWordWrapping
-            
-            self.text = text
-            self.calculatedHeight = calculatedHeight
-            
-            super.init()
-            
-            textView.delegate = self
+        init(parent: UIKitTextViewRepresentable) {
+            self.parent = parent
         }
         
-        func update(representable: UIKitTextViewRepresentable) {
-            textView.isScrollEnabled = representable.isScrollingEnabled
-            
-            if representable.clearText {
-                textView.text = ""
-                textView.font = .preferredFont(forTextStyle: .body)
-                textView.textColor = .label
-                textView.adjustsFontForContentSizeCategory = true
-                DispatchQueue.main.async {
-                    representable.clearText = false
-                }
-            }
-            
-            recalculateHeight()
+        func textViewDidChange(_ textView: UITextView) {
+            parent.text = textView.text
+            adjustTextViewHeight(textView)
         }
-
-        private func recalculateHeight() {
-            let newSize = textView.sizeThatFits(CGSize(width: textView.frame.width, height: .greatestFiniteMagnitude))
-            guard calculatedHeight.wrappedValue != newSize.height else { return }
+        
+        
+        func adjustTextViewHeight(_ textView: UITextView) {
+            let fixedWidth = textView.frame.size.width
+            var newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
             
-            DispatchQueue.main.async { // call in next render cycle.
-                self.calculatedHeight.wrappedValue = newSize.height
-            }
+            // Limit the calculated height to the maximum height constant
+            newSize.height = min(newSize.height, parent.viewModel.maxHeightConstant)
+            
+            guard parent.viewModel.calculatedHeight != newSize.height else { return }
+            
+            parent.viewModel.calculatedHeight = newSize.height
+            parent.viewModel.isScrollingEnabled = newSize.height >= parent.viewModel.maxHeightConstant
         }
-    }
-}
-
-extension UIKitTextViewRepresentable.Coordinator: UITextViewDelegate {
-    public func textViewDidChange(_ textView: UITextView) {
-        text.wrappedValue = NSAttributedString(attributedString: textView.attributedText)
-        recalculateHeight()
     }
 }

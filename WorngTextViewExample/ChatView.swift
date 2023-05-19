@@ -19,6 +19,7 @@ struct ChatView: View {
                     }
                 }
             }
+            
             MessageInputView()
         }
         .navigationBarTitleDisplayMode(.inline)

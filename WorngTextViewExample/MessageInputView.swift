@@ -21,14 +21,9 @@ extension Color {
 }
 
 struct MessageInputView: View {
-    
+    @State private var viewModel = MessageInputViewModel()
     @State private var message: String = ""
-    @State private var calculatedHeight: CGFloat = .zero
-    @State private var isScrollingEnabled = false
-    @State private var clearText = false
-    
-    private static let maxHeightConstant: CGFloat = 250
-    
+        
     var body: some View {
         VStack(spacing: 5) {
             Divider()
@@ -47,11 +42,9 @@ struct MessageInputView: View {
                 
                 UIKitTextViewRepresentable(
                     text: $message,
-                    calculatedHeight: $calculatedHeight,
-                    clearText: $clearText,
-                    isScrollingEnabled: isScrollingEnabled
+                    viewModel: viewModel
                 )
-                .frame(height: isScrollingEnabled ? Self.maxHeightConstant : calculatedHeight)
+                .frame(height: viewModel.calculatedHeight)
                 .background(
                     Text("Message...")
                         .foregroundColor(Color(.placeholderText))
@@ -59,18 +52,6 @@ struct MessageInputView: View {
                         .opacity(message.isEmpty ? 1 : 0),
                     alignment: .leading
                 )
-                .onChange(of: calculatedHeight) { newValue in
-                    if newValue < Self.maxHeightConstant {
-                        isScrollingEnabled = false
-                    } else {
-                        isScrollingEnabled = true
-                    }
-                }
-                .onChange(of: message, perform: { newValue in
-                    if newValue.isEmpty {
-                        clearText = true
-                    }
-                })
                 .background(Color.systemBackground)
                 .clipShape(RoundedRectangle(cornerSize: .init(width: 20, height: 20)))
                 
