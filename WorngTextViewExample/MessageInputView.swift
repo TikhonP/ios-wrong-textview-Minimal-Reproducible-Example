@@ -20,6 +20,7 @@ extension Color {
     }()
 }
 
+
 struct MessageInputView: View {
     @State private var viewModel = MessageInputViewModel()
     @State private var message: String = ""
@@ -40,21 +41,26 @@ struct MessageInputView: View {
                         .foregroundColor(.secondary.opacity(0.7))
                 }
                 
-                UIKitTextViewRepresentable(
-                    text: $message,
-                    viewModel: viewModel
-                )
-                .frame(height: viewModel.calculatedHeight)
-                .background(
-                    Text("Message...")
-                        .foregroundColor(Color(.placeholderText))
-                        .padding(.leading, 14)
-                        .opacity(message.isEmpty ? 1 : 0),
-                    alignment: .leading
-                )
-                .background(Color.systemBackground)
-                .clipShape(RoundedRectangle(cornerSize: .init(width: 20, height: 20)))
+                TextEditorTextFieldViewFallback(text: $message)
+                    .padding(.horizontal, 10)
+                    .background(Color.systemBackground)
+                    .clipShape(RoundedRectangle(cornerSize: .init(width: 20, height: 20)))
                 
+//                UIKitTextViewRepresentable(
+//                    text: $message,
+//                    viewModel: viewModel
+//                )
+//                .frame(height: viewModel.calculatedHeight)
+//                .background(
+//                    Text("Message...")
+//                        .foregroundColor(Color(.placeholderText))
+//                        .padding(.leading, 14)
+//                        .opacity(message.isEmpty ? 1 : 0),
+//                    alignment: .leading
+//                )
+                
+                
+//
                 Button {
                     // Some staff
                 } label: {
@@ -68,24 +74,24 @@ struct MessageInputView: View {
             .padding(.horizontal, 7)
         }
         .padding(.bottom, 5)
-        .background(.regularMaterial, ignoresSafeAreaEdges: .all)
+        .background(Color.yellow)
     }
 }
 
 #if DEBUG
-//struct MessageInputView_Previews: PreviewProvider {
-//    //    static let persistence = PersistenceController.preview
-//    //
-//    //    static var contract1: Contract = {
-//    //        let context = persistence.container.viewContext
-//    //        return Contract.createSampleContract1(for: context)
-//    //    }()
-//    //
-//    static var previews: some View {
-//        MessageInputView()
-//        //            .environment(\.managedObjectContext, persistence.container.viewContext)
+struct MessageInputView_Previews: PreviewProvider {
+    //    static let persistence = PersistenceController.preview
+    //
+    //    static var contract1: Contract = {
+    //        let context = persistence.container.viewContext
+    //        return Contract.createSampleContract1(for: context)
+    //    }()
+    //
+    static var previews: some View {
+        MessageInputView()
+        //            .environment(\.managedObjectContext, persistence.container.viewContext)
 //            .environmentObject(ChatViewModel(contract: )
-//            .previewLayout(PreviewLayout.sizeThatFits)
-//    }
-//}
+            .previewLayout(PreviewLayout.sizeThatFits)
+    }
+}
 #endif
